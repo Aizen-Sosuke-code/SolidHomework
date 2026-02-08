@@ -1,1 +1,215 @@
+using System;
+
+namespace SolidHomework
+{
+    // =================================================
+    // 1. SINGLE RESPONSIBILITY PRINCIPLE (SRP)
+    // =================================================
+
+    // Order отвечает ТОЛЬКО за данные заказа
+    public class Order
+    {
+        public string ProductName { get; set; }
+        public int Quantity { get; set; }
+        public double Price { get; set; }
+    }
+
+    // Отдельный класс для расчета стоимости
+    public class PriceCalculator
+    {
+        public double Calculate(Order order)
+        {
+            return order.Quantity * order.Price * 0.9; // скидка 10%
+        }
+    }
+
+    // Отдельный класс для оплаты
+    public class PaymentProcessor
+    {
+        public void Process(string paymentDetails)
+        {
+            Console.WriteLine("Payment processed using: " + paymentDetails);
+        }
+    }
+
+    // Отдельный класс для уведомлений
+    public class EmailService
+    {
+        public void Send(string email)
+        {
+            Console.WriteLine("Confirmation email sent to: " + email);
+        }
+    }
+
+    // =================================================
+    // 2. OPEN-CLOSED PRINCIPLE (OCP)
+    // =================================================
+
+    public class Employee
+    {
+        public string Name { get; set; }
+        public double BaseSalary { get; set; }
+    }
+
+    public interface ISalaryCalculator
+    {
+        double CalculateSalary(Employee employee);
+    }
+
+    public class PermanentEmployeeSalary : ISalaryCalculator
+    {
+        public double CalculateSalary(Employee employee)
+        {
+            return employee.BaseSalary * 1.2;
+        }
+    }
+
+    public class ContractEmployeeSalary : ISalaryCalculator
+    {
+        public double CalculateSalary(Employee employee)
+        {
+            return employee.BaseSalary * 1.1;
+        }
+    }
+
+    public class InternEmployeeSalary : ISalaryCalculator
+    {
+        public double CalculateSalary(Employee employee)
+        {
+            return employee.BaseSalary * 0.8;
+        }
+    }
+
+    public class SalaryService
+    {
+        public double Calculate(Employee employee, ISalaryCalculator calculator)
+        {
+            return calculator.CalculateSalary(employee);
+        }
+    }
+
+    // =================================================
+    // 3. INTERFACE SEGREGATION PRINCIPLE (ISP)
+    // =================================================
+
+    public interface IPrinter
+    {
+        void Print(string content);
+    }
+
+    public interface IScanner
+    {
+        void Scan(string content);
+    }
+
+    public interface IFax
+    {
+        void Fax(string content);
+    }
+
+    public class AllInOnePrinter : IPrinter, IScanner, IFax
+    {
+        public void Print(string content)
+        {
+            Console.WriteLine("Printing: " + content);
+        }
+
+        public void Scan(string content)
+        {
+            Console.WriteLine("Scanning: " + content);
+        }
+
+        public void Fax(string content)
+        {
+            Console.WriteLine("Faxing: " + content);
+        }
+    }
+
+    public class BasicPrinter : IPrinter
+    {
+        public void Print(string content)
+        {
+            Console.WriteLine("Printing: " + content);
+        }
+    }
+
+    // =================================================
+    // 4. DEPENDENCY INVERSION PRINCIPLE (DIP)
+    // =================================================
+
+    public interface IMessageSender
+    {
+        void Send(string message);
+    }
+
+    public class EmailSender : IMessageSender
+    {
+        public void Send(string message)
+        {
+            Console.WriteLine("Email sent: " + message);
+        }
+    }
+
+    public class SmsSender : IMessageSender
+    {
+        public void Send(string message)
+        {
+            Console.WriteLine("SMS sent: " + message);
+        }
+    }
+
+    public class NotificationService
+    {
+        private IMessageSender sender;
+
+        public NotificationService(IMessageSender sender)
+        {
+            this.sender = sender;
+        }
+
+        public void SendNotification(string message)
+        {
+            sender.Send(message);
+        }
+    }
+
+    // =================================================
+    // TEST (Main)
+    // =================================================
+
+    class Program
+    {
+        static void Main()
+        {
+            // --- SRP ---
+            Order order = new Order { ProductName = "Laptop", Quantity = 2, Price = 300000 };
+            PriceCalculator calculator = new PriceCalculator();
+            Console.WriteLine("Total price: " + calculator.Calculate(order));
+
+            PaymentProcessor payment = new PaymentProcessor();
+            payment.Process("Credit Card");
+
+            EmailService email = new EmailService();
+            email.Send("user@mail.com");
+
+            // --- OCP ---
+            Employee employee = new Employee { Name = "Ali", BaseSalary = 200000 };
+            SalaryService salaryService = new SalaryService();
+            ISalaryCalculator salaryCalculator = new PermanentEmployeeSalary();
+            Console.WriteLine("Salary: " + salaryService.Calculate(employee, salaryCalculator));
+
+            // --- ISP ---
+            IPrinter printer = new BasicPrinter();
+            printer.Print("Hello SOLID");
+
+            // --- DIP ---
+            IMessageSender sender = new EmailSender();
+            NotificationService notificationService = new NotificationService(sender);
+            notificationService.SendNotification("SOLID principles applied!");
+
+            Console.WriteLine("\nPress any key to exit...");
+            Console.ReadKey();
+        }
+    }
+}
 
